@@ -207,6 +207,7 @@ schema reference.
 <!-- SCREENSHOT: send-to-list panel -->
 **Send to list**
 ![Send to list](docs/screenshots/shopping-panel1.png)
+![Send to list2](docs/screenshots/shopping-panel2.png)
 
 <!-- SCREENSHOT: 3-tab import -->
 **Import dialog**
