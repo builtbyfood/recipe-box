@@ -14,8 +14,7 @@ migration.
 ![Recipe Box overview](docs/screenshots/mobiledash.png)
 ![Recipe Box overview](docs/screenshots/mobiledash2.png)
 ![Recipe Box overview1](docs/screenshots/main.png)
-![Recipe Box overview2](docs/screenshots/main2.png)
-![Recipe Box overview3](docs/screenshots/main3.png)
+
 ## Features
 
 **Multiple import paths**
@@ -200,9 +199,9 @@ schema reference.
 <!-- SCREENSHOT: detail view -->
 **Detail view**
 
-![Detail view](docs/screenshots/detail1.png)
+![Detail view](docs/screenshots/main.png)
 
-![Detail view2](docs/screenshots/detail2.png)
+![Detail view2](docs/screenshots/main2.png)
 
 <!-- SCREENSHOT: cook mode -->
 **Cook mode**
