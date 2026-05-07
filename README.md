@@ -203,6 +203,8 @@ schema reference.
 
 ![Detail view2](docs/screenshots/main2.png)
 
+![Detail view3](docs/screenshots/maine.png)
+
 <!-- SCREENSHOT: cook mode -->
 **Cook mode**
 
