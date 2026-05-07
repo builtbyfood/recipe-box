@@ -2,6 +2,34 @@
 
 All notable changes to this project are documented here.
 
+## [0.3.1] — 2026-05-07
+
+Mobile UI fixes for glassmorphism dashboards.
+
+### Fixed
+- **Card font no longer affected by Android system font scaling** —
+  `:host` now anchors base size in pixels via
+  `--recipe-box-base-font-size` (default 14px). Set this CSS variable
+  on the wrapping `ha-card` to scale the card up or down without
+  Samsung/Android Accessibility "Large/Huge" font settings inflating
+  detail and edit views.
+- **Send-to-list dropdown options are visible** — `<select>` and
+  `<option>` elements now use explicit white-bg/dark-fg colors that
+  survive translucent theme overrides. Native dropdown popups on
+  Android/iOS no longer render text-on-same-color.
+- **No imposed minimum height on the card** — `ha-card` inside the
+  recipe-box-card now sets `min-height: auto` so wrapper cards
+  (`mod-card`, masonry layouts) don't stretch the card past its
+  natural content height.
+- **Library sort/group dropdowns** — same explicit color treatment
+  applied so they're readable in dark glass themes.
+
+### Added
+- `examples/mobile-dashboard-glass.yaml` — production-ready
+  glassmorphism mobile dashboard that overrides `--ha-card-background`
+  (only ha-card elements) instead of `--card-background-color` (form
+  controls), preventing dropdown invisibility.
+
 ## [0.3.0] — 2026-05-07
 
 First public release. Combines the integration and card into a

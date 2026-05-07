@@ -1,0 +1,88 @@
+# Recipe Box — Mobile Dashboard (glassmorphism style)
+#
+# Translucent dark cards with a blurred food background. Designed for
+# phone or wall-mounted tablet.
+#
+# Requires the `mod-card` and `card-mod` HACS plugins for the
+# wrapper-card pattern and the per-card style injection.
+#
+# Replace entity IDs marked CONFIGURE with your own.
+
+views:
+  - title: Recipes
+    path: recipes
+    icon: mdi:silverware-fork-knife
+
+    # Full-bleed background image. Pick any food shot you like — this
+    # one is a free-use Unsplash URL.
+    background: >
+      center / cover no-repeat fixed
+      url("https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1600&q=80")
+
+    cards:
+      # Translucent header card
+      - type: markdown
+        content: |
+          ## 🍽️ Recipe Box
+        card_mod:
+          style: |
+            ha-card {
+              background: rgba(20, 20, 20, 0.45) !important;
+              backdrop-filter: blur(20px);
+              -webkit-backdrop-filter: blur(20px);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              border-radius: 16px;
+              color: #fff;
+              padding: 4px 8px;
+              min-height: auto;
+            }
+
+      # Recipe Box card — wrapped in mod-card so we can apply glassmorphism
+      # to the OUTER ha-card without breaking the inner card's typography
+      # or input rendering.
+      - type: custom:mod-card
+        # Override ONLY --ha-card-background (specific to ha-card elements).
+        # Don't override --card-background-color — that's inherited by
+        # <select>, <input>, and other form controls, and making it
+        # translucent makes dropdowns unreadable.
+        card_mod:
+          style: |
+            ha-card {
+              background: rgba(20, 20, 20, 0.45) !important;
+              backdrop-filter: blur(20px);
+              -webkit-backdrop-filter: blur(20px);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              border-radius: 16px;
+              min-height: auto;
+              /* Anchor card's base font-size to keep mobile compact */
+              --recipe-box-base-font-size: 13px;
+              /* Text colors for the recipe-box-card's content */
+              --primary-text-color: rgba(255, 255, 255, 0.95);
+              --secondary-text-color: rgba(255, 255, 255, 0.7);
+              --divider-color: rgba(255, 255, 255, 0.15);
+            }
+        card:
+          type: custom:recipe-box-card
+          view: library
+          columns: 1
+          show_filters: true
+          group_by: tag
+          default_todo: todo.<your_shopping_list>      # CONFIGURE
+
+      # Translucent shopping list panel
+      - type: todo-list
+        entity: todo.<your_shopping_list>              # CONFIGURE
+        title: Shopping list
+        card_mod:
+          style: |
+            ha-card {
+              background: rgba(20, 20, 20, 0.45) !important;
+              backdrop-filter: blur(20px);
+              -webkit-backdrop-filter: blur(20px);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              border-radius: 16px;
+              min-height: auto;
+              --primary-text-color: rgba(255, 255, 255, 0.95);
+              --secondary-text-color: rgba(255, 255, 255, 0.7);
+              --divider-color: rgba(255, 255, 255, 0.15);
+            }

@@ -1,6 +1,6 @@
 {
   "name": "recipe-box-card",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Lovelace card for the Recipe Box integration",
   "type": "module",
   "main": "dist/recipe-box-card.js",
