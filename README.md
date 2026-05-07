@@ -196,23 +196,27 @@ schema reference.
 
 <!-- SCREENSHOT: detail view -->
 **Detail view**
-![Detail view](docs/screenshots/detail.png)
+![Detail view](docs/screenshots/detail1.png)
+![Detail view2](docs/screenshots/detail2.png)
 
 <!-- SCREENSHOT: cook mode -->
 **Cook mode**
-![Cook mode](docs/screenshots/cook.png)
+![Cook mode](docs/screenshots/cook1.png)
+![Cook mode2](docs/screenshots/cook2.png)
 
 <!-- SCREENSHOT: send-to-list panel -->
 **Send to list**
-![Send to list](docs/screenshots/shopping-panel.png)
+![Send to list](docs/screenshots/shopping-panel1.png)
+![Send to list2](docs/screenshots/shopping-panel2.png)
 
 <!-- SCREENSHOT: 3-tab import -->
 **Import dialog**
-![Import](docs/screenshots/import.png)
+![Import2](docs/screenshots/import.png)
 
 <!-- SCREENSHOT: edit mode with image URL field -->
 **Edit mode**
-![Edit](docs/screenshots/edit.png)
+![Edit](docs/screenshots/edit1.png)
+![Edit2](docs/screenshots/edit2.png)
 
 <!-- SCREENSHOT: import notification on phone -->
 **Phone notification after share-sheet import**
