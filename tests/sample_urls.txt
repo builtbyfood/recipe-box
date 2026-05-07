@@ -1,0 +1,21 @@
+# Sample URLs for testing the parser. Replace with your favorite sites.
+# Lines starting with # are skipped.
+#
+# Run:  python tests/test_parser.py --batch tests/sample_urls.txt
+#
+# Mainstream food publishers (well-supported by recipe-scrapers):
+https://www.allrecipes.com/recipe/10813/best-chocolate-chip-cookies/
+https://www.bonappetit.com/recipe/bas-best-chocolate-chip-cookies
+https://www.seriouseats.com/the-food-lab-best-chocolate-chip-cookie-recipe
+https://cooking.nytimes.com/recipes/1015819-chocolate-chip-cookies
+https://www.foodnetwork.com/recipes/alton-brown/the-chewy-recipe-1909046
+
+# Independent food blogs (schema.org JSON-LD fallback typically works):
+https://smittenkitchen.com/2008/07/best-chocolate-chip-cookies/
+https://www.budgetbytes.com/easy-homemade-pizza-dough/
+https://www.halfbakedharvest.com/the-best-chocolate-chip-cookies/
+
+# Edge cases worth probing:
+# - Sites without schema.org markup (parser should fail gracefully)
+# - Recipe collections / index pages (should fail with clear error)
+# - Pages with embedded video but no recipe (should fail with clear error)

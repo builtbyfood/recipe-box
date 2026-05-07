@@ -1,0 +1,155 @@
+blueprint:
+  name: "Recipe Box: Import from share sheet"
+  description: >
+    Listens for `mobile_app.share` events from the Home Assistant
+    Companion app and imports the shared URL or text as a recipe.
+
+    Sends a deep-link notification when the import succeeds, and a
+    "couldn't fetch — try sharing as text" notification when a site
+    blocks the server-side fetch (Cloudflare, etc.).
+
+    Requires the [Recipe Box integration](https://github.com/travisdeluca/ha-recipe-box).
+  domain: automation
+  source_url: https://github.com/travisdeluca/recipe-box-card/blob/main/blueprints/share-event.yaml
+  input:
+    notify_targets:
+      name: Notification target(s)
+      description: >
+        One or more `notify` services to send the import notification to.
+        Pick a single phone, multiple phones, or a notify group.
+      selector:
+        select:
+          multiple: true
+          custom_value: true
+          options: []
+    dashboard_path:
+      name: Dashboard path
+      description: >
+        The deep-link path to your Recipe Box dashboard view. Format is
+        `<dashboard-url>/<view-path>`. For example, if your mobile
+        dashboard is at `/recipes-mobile/recipes` then enter
+        `recipes-mobile/recipes` here. The notification's "Open" button
+        will deep-link to `homeassistant://navigate/<this value>`.
+      default: "lovelace/recipes"
+      selector:
+        text:
+    on_conflict:
+      name: When the same recipe is imported twice
+      description: >
+        - **New copy** (default) — saves with a `-2` slug suffix
+        - **Skip** — silent no-op if the URL was already imported
+        - **Overwrite** — replaces the existing recipe
+      default: new_copy
+      selector:
+        select:
+          options:
+            - label: New copy
+              value: new_copy
+            - label: Skip
+              value: skip
+            - label: Overwrite
+              value: overwrite
+
+mode: parallel
+max_exceeded: silent
+
+trigger:
+  - platform: event
+    event_type: mobile_app.share
+
+action:
+  - variables:
+      shared_url: "{{ trigger.event.data.url | default('') }}"
+      shared_text: "{{ trigger.event.data.text | default('') }}"
+      shared_subject: "{{ trigger.event.data.subject | default('') }}"
+      looks_like_url: "{{ shared_text is search('^https?://') }}"
+      dash: !input dashboard_path
+      conflict: !input on_conflict
+
+  - choose:
+      # ---- URL share path
+      - conditions:
+          - "{{ shared_url | length > 0 or looks_like_url }}"
+        sequence:
+          - service: recipe_box.add_from_url
+            data:
+              url: "{{ shared_url if shared_url else shared_text }}"
+              on_conflict: "{{ conflict }}"
+            response_variable: import_result
+            continue_on_error: true
+
+          - choose:
+              - conditions:
+                  - "{{ import_result is defined and import_result.slug is defined }}"
+                sequence:
+                  - repeat:
+                      for_each: !input notify_targets
+                      sequence:
+                        - service: "{{ repeat.item }}"
+                          data:
+                            title: "Recipe imported"
+                            message: >-
+                              {{ import_result.name }}
+                              ({{ import_result.ingredient_count }} ingredients)
+                            data:
+                              actions:
+                                - action: URI
+                                  title: "Open"
+                                  uri: "homeassistant://navigate/{{ dash }}"
+            default:
+              - repeat:
+                  for_each: !input notify_targets
+                  sequence:
+                    - service: "{{ repeat.item }}"
+                      data:
+                        title: "Couldn't fetch recipe"
+                        message: >-
+                          {{ shared_subject | default('Page') }} couldn't be fetched
+                          automatically (likely Cloudflare). Open the page,
+                          select the recipe text, then Share as text.
+                        data:
+                          actions:
+                            - action: URI
+                              title: "Open Recipe Box"
+                              uri: "homeassistant://navigate/{{ dash }}"
+
+      # ---- Text share path
+      - conditions:
+          - "{{ shared_text | length > 200 }}"
+        sequence:
+          - service: recipe_box.add_from_url
+            data:
+              text: "{{ shared_text }}"
+              on_conflict: "{{ conflict }}"
+            response_variable: import_result
+            continue_on_error: true
+
+          - choose:
+              - conditions:
+                  - "{{ import_result is defined and import_result.slug is defined }}"
+                sequence:
+                  - repeat:
+                      for_each: !input notify_targets
+                      sequence:
+                        - service: "{{ repeat.item }}"
+                          data:
+                            title: "Recipe imported from text"
+                            message: >-
+                              {{ import_result.name }}
+                              ({{ import_result.ingredient_count }} ingredients)
+                            data:
+                              actions:
+                                - action: URI
+                                  title: "Open"
+                                  uri: "homeassistant://navigate/{{ dash }}"
+            default:
+              - repeat:
+                  for_each: !input notify_targets
+                  sequence:
+                    - service: "{{ repeat.item }}"
+                      data:
+                        title: "Couldn't parse shared text"
+                        message: >-
+                          The share didn't contain a recognizable recipe — the
+                          parser needs "Ingredients" and "Directions" headers
+                          somewhere in the text.

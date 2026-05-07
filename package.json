@@ -1,0 +1,31 @@
+{
+  "name": "recipe-box-card",
+  "version": "0.3.0",
+  "description": "Lovelace card for the Recipe Box integration",
+  "type": "module",
+  "main": "dist/recipe-box-card.js",
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c --watch",
+    "lint": "eslint src --ext .ts"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "rollup": "^4.12.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "lit": "^3.1.2"
+  },
+  "keywords": [
+    "home-assistant",
+    "homeassistant",
+    "hacs",
+    "lovelace",
+    "recipes"
+  ],
+  "license": "MIT"
+}

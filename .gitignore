@@ -1,0 +1,17 @@
+# Build artifacts (but NOT dist/ — HACS pulls from there)
+node_modules/
+*.tsbuildinfo
+
+# Editor cruft
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Env
+.env

@@ -1,0 +1,51 @@
+# Recipe Box — Desktop Dashboard
+#
+# Drop this view into your existing Lovelace dashboard, or use it as a
+# standalone dashboard for a desktop browser. Library card is wide
+# (3-4 columns), with the tag filter sidebar enabled.
+#
+# Replace the entity IDs marked CONFIGURE with your own:
+#   - todo.<your_shopping_list>      — your shopping list (find via Dev Tools → States, filter "todo.")
+#   - timer.kitchen               — optional kitchen timer for cook mode
+#
+# After saving, the URL will be: /<dashboard-url-path>/recipes
+
+views:
+  - title: Recipes
+    path: recipes
+    icon: mdi:silverware-fork-knife
+    type: sections
+    max_columns: 3
+    sections:
+      # Main library — recipe grid + tag filters + import flow
+      - type: grid
+        cards:
+          - type: custom:recipe-box-card
+            view: library
+            columns: 4
+            show_filters: true
+            default_todo: todo.<your_shopping_list>   # CONFIGURE
+            title: Recipe Box
+
+      # Right rail — shopping list + kitchen timer
+      - type: grid
+        cards:
+          # Live view of your shopping list. The recipe-box-card itself
+          # writes to this same list via the Send-to-list panel; this
+          # card lets you see and tick items off without leaving the
+          # dashboard.
+          - type: todo-list
+            entity: todo.<your_shopping_list>         # CONFIGURE
+            title: Shopping list
+
+          # Kitchen timer — driven by Cook mode's auto-timer button.
+          # Define this in configuration.yaml first:
+          #   timer:
+          #     kitchen:
+          #       name: Kitchen timer
+          #       restore: true
+          - type: tile
+            entity: timer.kitchen                  # CONFIGURE
+            name: Kitchen timer
+            features_position: bottom
+            vertical: false

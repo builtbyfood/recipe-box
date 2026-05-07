@@ -1,0 +1,153 @@
+add_from_url:
+  name: Add recipe from URL, HTML, or pasted text
+  description: >
+    Fetch and parse a recipe from a URL, pre-fetched HTML, or pasted
+    text. Use the Lovelace card for the review-before-save flow; this
+    service is for automations (mobile_app_share, bookmarklet) and scripts.
+  fields:
+    url:
+      name: URL
+      description: >
+        URL of the recipe page. Required unless `html` or `text` is
+        provided. Used as the source label even when not fetched.
+      example: https://example.com/recipes/chocolate-chip-cookies
+      selector:
+        text:
+    html:
+      name: HTML (optional)
+      description: >
+        Pre-fetched page HTML. If provided, the integration parses this
+        directly instead of fetching the URL itself. Used by the
+        bookmarklet to bypass bot protection (Cloudflare).
+      selector:
+        text:
+          multiline: true
+    text:
+      name: Plain text (optional)
+      description: >
+        Free-text recipe content (paste from a rendered recipe page). The
+        parser looks for section headers like "Ingredients" and
+        "Directions". Used by the mobile_app_share automation when the
+        share intent contains text rather than a URL.
+      selector:
+        text:
+          multiline: true
+    slug:
+      name: Slug override
+      description: Override the auto-generated slug.
+      example: my-cookies
+      selector:
+        text:
+    tags:
+      name: Tags
+      description: Tags to attach to the recipe.
+      example: ["weeknight", "vegetarian"]
+      selector:
+        text:
+          multiple: true
+    notes:
+      name: Notes
+      description: Initial notes for this recipe.
+      selector:
+        text:
+          multiline: true
+    on_conflict:
+      name: On conflict
+      description: >
+        What to do if a recipe with this slug already exists. 'error'
+        (default) fails the call so automations don't silently overwrite.
+        'overwrite' refreshes content but preserves your tags/notes/last_cooked.
+        'new_copy' suffixes the slug. 'skip' returns the existing recipe.
+      default: error
+      selector:
+        select:
+          options:
+            - error
+            - overwrite
+            - new_copy
+            - skip
+    notify_target:
+      name: Notify target (optional)
+      description: >
+        notify.* service to ping after save (e.g. notify.mobile_app_pixel).
+        Skip this if you'd rather react to the recipe_box_imported event
+        in your own automation.
+      example: notify.mobile_app_<your_phone>
+      selector:
+        text:
+
+add_to_list:
+  name: Add ingredients to shopping list
+  description: >
+    Add a recipe's ingredients to a todo list (works with OurGroceries,
+    native shopping list, Bring!, anything that exposes a todo entity).
+    Optionally scaled to your serving count, with fuzzy-dedup against
+    items already on the list.
+  fields:
+    recipe_id:
+      name: Recipe slug
+      description: Slug of the recipe to add.
+      required: true
+      example: chocolate-chip-cookies
+      selector:
+        text:
+    todo_entity:
+      name: Shopping list
+      description: Which todo list to add to.
+      required: true
+      selector:
+        entity:
+          domain: todo
+    servings:
+      name: Servings
+      description: >
+        Servings to scale to. If omitted, uses the recipe's base yield.
+      example: 8
+      selector:
+        number:
+          min: 1
+          max: 100
+          step: 0.5
+    skip_existing:
+      name: Skip items already on list
+      description: >
+        Skip ingredients that fuzzy-match items already on the list
+        (so re-adding a recipe doesn't duplicate "1 cup flour").
+      default: true
+      selector:
+        boolean:
+    compact:
+      name: Compact item text
+      description: >
+        Strip quantities and measurement units from each item before
+        adding ("2 1/4 cups all-purpose flour" → "all-purpose flour").
+        Set false to send the full ingredient line as-is.
+      default: true
+      selector:
+        boolean:
+
+mark_cooked:
+  name: Mark recipe as cooked
+  description: Increment cooked_count and stamp last_cooked.
+  fields:
+    recipe_id:
+      name: Recipe slug
+      required: true
+      selector:
+        text:
+
+delete:
+  name: Delete recipe
+  description: Delete a recipe and its files.
+  fields:
+    recipe_id:
+      name: Recipe slug
+      required: true
+      selector:
+        text:
+
+refresh:
+  name: Refresh from disk
+  description: >
+    Re-scan the recipes folder. The watchdog observer normally handles
+    this automatically; use this if changes aren't being picked up.

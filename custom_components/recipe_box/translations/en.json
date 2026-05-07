@@ -1,0 +1,23 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Recipe Box",
+        "description": "Where should recipes be stored? Use an SMB or NFS share path so the data stays portable for future self-hosted tools (Mealie, Tandoor, etc.).",
+        "data": {
+          "recipes_path": "Recipes folder path",
+          "default_todo_entity": "Default shopping list (optional)",
+          "fuzzy_threshold": "Fuzzy-match threshold for shopping list dedup (50-100)"
+        }
+      }
+    },
+    "error": {
+      "must_be_absolute": "Path must be absolute (e.g. /media/recipes).",
+      "not_a_directory": "Path exists but is not a directory.",
+      "cannot_create": "Path could not be created. Check permissions and that the share is mounted."
+    },
+    "abort": {
+      "already_configured": "This recipes folder is already configured."
+    }
+  }
+}

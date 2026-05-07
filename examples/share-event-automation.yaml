@@ -1,0 +1,86 @@
+# Recipe Box — Import via Companion app share sheet
+#
+# Listens for the `mobile_app.share` event fired by the Home Assistant
+# Companion app whenever you tap "Share" → "Home Assistant" from any
+# other app on your phone. Note the literal dot in the event name —
+# unusual for HA, but documented:
+#   https://companion.home-assistant.io/docs/integrations/sharing/
+#
+# Event data shape (Android):
+#   { caller: "android-app://com.android.chrome",
+#     subject: "Webpage Title",
+#     url: "https://...",
+#     text: "...",
+#     device_id: "..." }
+#
+# Setup notes:
+#   - Replace `notify.mobile_app_<your_phone>` with your phone's
+#     notify entity.
+#   - Replace `<your-dashboard-path>/recipes` with the actual path to your
+#     mobile dashboard's recipes view.
+
+alias: "Recipe Box: import from share sheet"
+description: >
+  Imports the recipe URL or text shared from another app via the
+  Companion app's share-target integration.
+mode: parallel
+
+trigger:
+  - platform: event
+    event_type: mobile_app.share
+
+action:
+  - variables:
+      shared_url: "{{ trigger.event.data.url | default('') }}"
+      shared_text: "{{ trigger.event.data.text | default('') }}"
+      shared_subject: "{{ trigger.event.data.subject | default('') }}"
+      looks_like_url: >-
+        {{ shared_text is search('^https?://') }}
+
+  - choose:
+      # ---- Branch 1: a URL was shared (or text that's actually a URL)
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ shared_url | length > 0 or looks_like_url }}
+        sequence:
+          - service: recipe_box.add_from_url
+            data:
+              url: "{{ shared_url if shared_url else shared_text }}"
+              on_conflict: new_copy
+            response_variable: result
+          - service: notify.mobile_app_<your_phone>   # CONFIGURE
+            data:
+              title: "Recipe imported"
+              message: >-
+                {{ result.name | default(shared_subject) | default('Recipe saved') }}
+                ({{ result.ingredient_count | default(0) }} ingredients)
+              data:
+                actions:
+                  - action: URI
+                    title: "Open"
+                    uri: "homeassistant://navigate/<your-dashboard-path>/recipes"  # CONFIGURE
+
+      # ---- Branch 2: pasted recipe text (long enough to plausibly be one)
+      - conditions:
+          - condition: template
+            value_template: "{{ shared_text | length > 200 }}"
+        sequence:
+          - service: recipe_box.add_from_url
+            data:
+              text: "{{ shared_text }}"
+              on_conflict: new_copy
+            response_variable: result
+          - service: notify.mobile_app_<your_phone>   # CONFIGURE
+            data:
+              title: "Recipe imported from text"
+              message: >-
+                {{ result.name | default('Recipe saved') }}
+                ({{ result.ingredient_count | default(0) }} ingredients)
+              data:
+                actions:
+                  - action: URI
+                    title: "Open"
+                    uri: "homeassistant://navigate/<your-dashboard-path>/recipes"  # CONFIGURE
+
+    # Fallthrough: text too short or empty payload — silently ignore.

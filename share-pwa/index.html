@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#18181b">
+  <title>Recipe Box</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #18181b;
+      color: #fafafa;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      padding-top: max(20px, env(safe-area-inset-top));
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+    .container {
+      width: 100%;
+      max-width: 420px;
+    }
+    .card {
+      background: #27272a;
+      border: 1px solid #3f3f46;
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+      transition: opacity 0.2s;
+    }
+    .icon {
+      font-size: 48px;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+    .icon-success { color: #10b981; }
+    .icon-error { color: #ef4444; }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 1.4em;
+      font-weight: 500;
+    }
+    h1.success { color: #10b981; }
+    h1.error { color: #ef4444; }
+    p {
+      color: #a1a1aa;
+      margin: 8px 0 0;
+      font-size: 0.95em;
+      line-height: 1.4;
+    }
+    .url {
+      background: #18181b;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.8em;
+      word-break: break-all;
+      margin: 20px 0;
+      text-align: left;
+      color: #d4d4d8;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+    .input-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 16px 0;
+      text-align: left;
+    }
+    label {
+      font-size: 0.8em;
+      color: #a1a1aa;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    input {
+      background: #18181b;
+      border: 1px solid #52525b;
+      color: white;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 1em;
+      font-family: inherit;
+      width: 100%;
+    }
+    input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    input::placeholder { color: #52525b; }
+    .actions { display: flex; gap: 8px; flex-direction: column; }
+    button {
+      background: #3b82f6;
+      color: white;
+      border: 0;
+      padding: 14px 24px;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.15s;
+    }
+    button:active { background: #2563eb; }
+    button.secondary {
+      background: transparent;
+      border: 1px solid #52525b;
+      color: #d4d4d8;
+    }
+    button.secondary:active { background: #27272a; }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid #3f3f46;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .footer {
+      text-align: center;
+      font-size: 0.75em;
+      color: #52525b;
+      margin-top: 16px;
+    }
+    .footer a { color: #71717a; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card" id="card"></div>
+    <div class="footer">Recipe Box · <a href="#" id="settings-link">Settings</a></div>
+  </div>
+
+  <script>
+    const card = document.getElementById("card");
+    const settingsLink = document.getElementById("settings-link");
+
+    // -------------------- Storage --------------------
+    function getWebhookId() {
+      return localStorage.getItem("recipe-box-webhook-id") || "";
+    }
+    function setWebhookId(id) {
+      localStorage.setItem("recipe-box-webhook-id", id);
+    }
+    function getMobileDashboard() {
+      return localStorage.getItem("recipe-box-mobile-path") || "/recipes-mobile/recipes";
+    }
+    function setMobileDashboard(path) {
+      localStorage.setItem("recipe-box-mobile-path", path);
+    }
+
+    // -------------------- Share intent parsing --------------------
+    // Web Share Target sends params via the URL. The URL might land in
+    // any of `url`, `text`, or `title` depending on the source app.
+    function getSharedUrl() {
+      const params = new URLSearchParams(location.search);
+      const direct = params.get("url");
+      if (direct && /^https?:\/\//i.test(direct)) return direct;
+
+      // Many apps shove the URL into the text field with the title
+      const text = params.get("text") || "";
+      const match = text.match(/https?:\/\/[^\s)]+/);
+      if (match) return match[0];
+
+      const title = params.get("title") || "";
+      const titleMatch = title.match(/https?:\/\/[^\s)]+/);
+      if (titleMatch) return titleMatch[0];
+
+      return null;
+    }
+
+    // -------------------- Renderers --------------------
+    function html(strings, ...values) {
+      return strings.reduce(
+        (acc, s, i) => acc + s + (values[i] != null ? String(values[i]) : ""),
+        ""
+      );
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+      );
+    }
+
+    function renderSettings(returnUrl) {
+      const wid = getWebhookId();
+      const dash = getMobileDashboard();
+      card.innerHTML = html`
+        <div class="icon">⚙️</div>
+        <h1>Settings</h1>
+        <p>Configure Recipe Box share targeting.</p>
+        <div class="input-row">
+          <label for="wid">Webhook ID</label>
+          <input id="wid" type="text" placeholder="recipe-box-share-..." value="${escapeHtml(wid)}">
+        </div>
+        <div class="input-row">
+          <label for="dash">Mobile dashboard path</label>
+          <input id="dash" type="text" placeholder="/recipes-mobile/recipes" value="${escapeHtml(dash)}">
+        </div>
+        <div class="actions">
+          <button id="save-btn">Save</button>
+          ${returnUrl ? `<button class="secondary" id="back-btn">Back</button>` : ""}
+        </div>
+      `;
+      document.getElementById("save-btn").onclick = () => {
+        const newWid = document.getElementById("wid").value.trim();
+        const newDash = document.getElementById("dash").value.trim();
+        if (!newWid) return;
+        setWebhookId(newWid);
+        if (newDash) setMobileDashboard(newDash);
+        if (returnUrl) {
+          importUrl(returnUrl);
+        } else {
+          renderHome();
+        }
+      };
+      if (returnUrl) {
+        document.getElementById("back-btn").onclick = () => importUrl(returnUrl);
+      }
+    }
+
+    function renderHome() {
+      const wid = getWebhookId();
+      card.innerHTML = html`
+        <div class="icon">🍳</div>
+        <h1>Recipe Box</h1>
+        <p>Share a recipe URL from any app — Chrome, Reddit, Discord — and tap "Recipe Box" in the share sheet.</p>
+        ${wid ? "" : `<p style="color:#f59e0b">Webhook not configured yet.</p>`}
+        <div class="actions" style="margin-top: 20px;">
+          <button id="open-dash">Open Recipe Box dashboard</button>
+          <button class="secondary" id="open-settings">Settings</button>
+        </div>
+      `;
+      document.getElementById("open-dash").onclick = () => {
+        window.location.href = getMobileDashboard();
+      };
+      document.getElementById("open-settings").onclick = () => renderSettings(null);
+    }
+
+    function renderImporting(url) {
+      card.innerHTML = html`
+        <div class="spinner"></div>
+        <h1>Importing...</h1>
+        <div class="url">${escapeHtml(url)}</div>
+      `;
+    }
+
+    function renderSuccess(url) {
+      card.innerHTML = html`
+        <div class="icon icon-success">✓</div>
+        <h1 class="success">Imported</h1>
+        <p>Check Home Assistant for the notification.</p>
+        <div class="url">${escapeHtml(url)}</div>
+        <div class="actions">
+          <button id="open-dash">Open Recipe Box</button>
+          <button class="secondary" id="close-btn">Close</button>
+        </div>
+      `;
+      document.getElementById("open-dash").onclick = () => {
+        window.location.href = getMobileDashboard();
+      };
+      document.getElementById("close-btn").onclick = () => window.close();
+      // Auto-close after 4 seconds if user does nothing
+      setTimeout(() => {
+        if (window.opener) window.close();
+      }, 4000);
+    }
+
+    function renderError(url, message) {
+      card.innerHTML = html`
+        <div class="icon icon-error">✗</div>
+        <h1 class="error">Failed</h1>
+        <p>${escapeHtml(message)}</p>
+        <div class="url">${escapeHtml(url)}</div>
+        <div class="actions">
+          <button id="retry-btn">Retry</button>
+          <button class="secondary" id="settings-btn">Settings</button>
+        </div>
+      `;
+      document.getElementById("retry-btn").onclick = () => importUrl(url);
+      document.getElementById("settings-btn").onclick = () => renderSettings(url);
+    }
+
+    // -------------------- Import --------------------
+    async function importUrl(url) {
+      const wid = getWebhookId();
+      if (!wid) {
+        renderSettings(url);
+        return;
+      }
+
+      renderImporting(url);
+
+      try {
+        const resp = await fetch(`/api/webhook/${wid}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url }),
+        });
+
+        if (resp.ok) {
+          renderSuccess(url);
+        } else {
+          renderError(url, `HTTP ${resp.status} — webhook returned an error`);
+        }
+      } catch (err) {
+        renderError(url, err.message || "Network error");
+      }
+    }
+
+    // -------------------- Entry point --------------------
+    settingsLink.onclick = (e) => {
+      e.preventDefault();
+      renderSettings(null);
+    };
+
+    const sharedUrl = getSharedUrl();
+    if (sharedUrl) {
+      importUrl(sharedUrl);
+    } else {
+      renderHome();
+    }
+
+    // Register service worker (required for PWA installability)
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(() => {
+        // Silently fail — PWA install won't work but the page still
+        // functions for direct URL imports.
+      });
+    }
+  </script>
+</body>
+</html>

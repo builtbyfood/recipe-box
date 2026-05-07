@@ -1,0 +1,31 @@
+# Recipe Box — Mobile/Tablet Dashboard
+#
+# Single-column layout optimized for phone or wall-mounted tablet. The
+# library defaults to 1 column with no tag sidebar. Cook mode is the
+# killer feature: tap a recipe → tap "Cook mode" → big text, screen
+# wakeLock, step-by-step with auto-detected timers.
+#
+# The view path here is `recipes` — combined with your dashboard's URL
+# slug (e.g. `<your-dashboard-path>`), the full deep-link path becomes:
+#     homeassistant://navigate/<your-dashboard-path>/recipes
+# Use this in mobile_app_share notifications to jump straight here.
+#
+# Replace entity IDs marked CONFIGURE with your own.
+
+views:
+  - title: Recipes
+    path: recipes
+    icon: mdi:silverware-fork-knife
+    cards:
+      - type: custom:recipe-box-card
+        view: library
+        columns: 1
+        show_filters: false
+        group_by: tag
+        default_todo: todo.<your_shopping_list>      # CONFIGURE
+
+      # Live shopping list right below the library — handy for quick
+      # ticking off items mid-cook.
+      - type: todo-list
+        entity: todo.<your_shopping_list>            # CONFIGURE
+        title: Shopping list

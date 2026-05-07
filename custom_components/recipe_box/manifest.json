@@ -1,0 +1,16 @@
+{
+  "domain": "recipe_box",
+  "name": "Recipe Box",
+  "codeowners": ["@travisdeluca"],
+  "config_flow": true,
+  "dependencies": ["http"],
+  "documentation": "https://github.com/travisdeluca/ha-recipe-box",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/travisdeluca/ha-recipe-box/issues",
+  "requirements": [
+    "recipe-scrapers>=15.0.0",
+    "watchdog>=4.0.0",
+    "rapidfuzz>=3.6.0"
+  ],
+  "version": "0.3.0"
+}
