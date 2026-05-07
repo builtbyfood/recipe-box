@@ -11,8 +11,9 @@ migration.
 
 
 <!-- SCREENSHOT: hero showing library + detail side-by-side -->
-![Recipe Box overview](docs/screenshots/hero.png)
-
+![Recipe Box overview](docs/screenshots/main.png)
+![Recipe Box overview2](docs/screenshots/main2.png)
+![Recipe Box overview3](docs/screenshots/main3.png)
 ## Features
 
 **Multiple import paths**
@@ -215,10 +216,17 @@ schema reference.
 
 ![Send to list2](docs/screenshots/shopping-panel2.png)
 
+![Send to list3](docs/screenshots/shopping-panel3.png)
+
+
 <!-- SCREENSHOT: 3-tab import -->
 **Import dialog**
 
-![Import2](docs/screenshots/import.png)
+![Import1](docs/screenshots/import1.png)
+
+![Import2](docs/screenshots/import2.png)
+
+![Import3](docs/screenshots/import3.png)
 
 <!-- SCREENSHOT: edit mode with image URL field -->
 **Edit mode**
@@ -226,6 +234,8 @@ schema reference.
 ![Edit](docs/screenshots/edit1.png)
 
 ![Edit2](docs/screenshots/edit2.png)
+
+![Edit3](docs/screenshots/edit3.png)
 
 <!-- SCREENSHOT: import notification on phone -->
 **Phone notification after share-sheet import**
